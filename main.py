@@ -1,31 +1,37 @@
 import streamlit as st
 from openai import OpenAI
 
-# Настройка страницы
-st.set_page_config(page_title="Qwen Studio Lite", page_icon="🤖", layout="wide")
-st.title("🤖 Qwen Studio Lite")
-st.caption("Облачный чат на базе Qwen API")
+# 1. Настройка вкладки браузера
+st.set_page_config(page_title="ОНЛАЙН", page_icon="logo.png", layout="wide")
 
-# Подключение к API (ключ берётся из безопасного хранилища Streamlit)
+# 2. Заголовок и ЛОГОТИП
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.image("logo.png", width=80)  # <-- Твой логотип!
+with col2:
+    st.title("ОНЛАЙН")
+    st.caption("Твой персональный AI-ассистент")
+
+# 3. Подключение к API
 client = OpenAI(
     api_key=st.secrets.get("QWEN_API_KEY", ""),
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
 
 if not client.api_key:
-    st.error("⚠️ API-ключ не найден. Добавь его в настройки Streamlit Cloud.")
+    st.error("⚠️ API-ключ не найден.")
     st.stop()
 
-# История сообщений
+# 4. История чата
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Отображение диалога
+# 5. Вывод сообщений
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Поле ввода
+# 6. Ввод и ответ
 if prompt := st.chat_input("Напиши сообщение..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -38,7 +44,7 @@ if prompt := st.chat_input("Напиши сообщение..."):
             response = client.chat.completions.create(
                 model="qwen-plus",
                 messages=[
-                    {"role": "system", "content": "Ты — умный ассистент в стиле Qwen Studio. Отвечай чётко, используй markdown."}
+                    {"role": "system", "content": "Ты — AI-ассистент ОНЛАЙН. Отвечай чётко и кратко."}
                 ] + st.session_state.messages,
                 stream=True
             )
@@ -49,4 +55,4 @@ if prompt := st.chat_input("Напиши сообщение..."):
             message_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
         except Exception as e:
-            st.error(f"❌ Ошибка API: {str(e)}")
+            st.error(f"❌ Ошибка: {str(e)}")
